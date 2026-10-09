@@ -3,10 +3,10 @@
   "repository": "fengoftian/spot-alert-comparison-pilot",
   "run_id": "37884728033",
   "source_commit": "693b9006916f72aa4d2396751d12c192d705fc61",
-  "checkpoint_sequence": 27,
-  "checkpoint_sha256": "ca0b20bfef687f4c305686cbd7e19c36a3dbc0e7fbdb67f444196cbfc21a35cf",
-  "published_state_utc": "2026-10-09T05:36:28.276921+00:00",
+  "checkpoint_sequence": 28,
+  "checkpoint_sha256": "eeb5e3b203e04c399160d9ef065645217095d993ad76dcb42c6ff1a774d82f04",
+  "published_state_utc": "2026-10-09T05:42:28.113473+00:00",
   "stage": "COLLECTING",
-  "last_tick": 1791524187850,
+  "last_tick": 1791524547686,
   "scientific_rules_changed": false
 }
