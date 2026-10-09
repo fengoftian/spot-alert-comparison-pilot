@@ -8,13 +8,18 @@ on:
         default: preflight
         type: choice
         options: [preflight, collect]
+      lease_seconds:
+        description: Operational lease duration (60–20100 seconds); study dates stay fixed
+        required: false
+        default: '20100'
+        type: string
   schedule:
     - cron: '17 */2 * * *'
 permissions:
   contents: write
   actions: write
 concurrency:
-  group: spot-alert-comparison-single-writer
+  group: ${{ inputs.mode == 'preflight' && 'spot-alert-comparison-preflight' || 'spot-alert-comparison-single-writer' }}
   cancel-in-progress: false
 jobs:
   preflight:
@@ -27,6 +32,7 @@ jobs:
         run: |
           python3 test_journal.py
           python3 test_real_schema.py
+          python3 test_cloud_runner.py
       - name: Check frozen engine in a disposable copy
         run: |
           temp_study=$(mktemp -d)
@@ -58,9 +64,11 @@ jobs:
             /SEED.json
             /journal/
             /STATUS.json
+            /CLOUD_STATUS.json
             /RESULTS.json
             /RESULTS.md
       - name: Collect every minute and checkpoint every five minutes
         env:
           GH_TOKEN: ${{ github.token }}
-        run: python3 source/cloud_runner.py collect --data observations --lease-seconds 20100 --checkpoint-seconds 300
+          LEASE_SECONDS: ${{ inputs.lease_seconds || '20100' }}
+        run: python3 source/cloud_runner.py collect --data observations --lease-seconds "$LEASE_SECONDS" --checkpoint-seconds 300

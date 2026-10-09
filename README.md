@@ -8,6 +8,8 @@ The fixed window is 9 October 2026 10:50 NZDT through 8 November 2026 10:50 NZDT
 
 Standard Ubuntu GitHub-hosted runners execute a minute loop within finite leases. State and raw public receipts are checkpointed to the `observations` branch. The scheduler is best effort: delays and missed live books remain explicit. Historical candle recovery does not recover timely books.
 
+After a healthy lease durably saves its final checkpoint, it requests a successor using the built-in GitHub token. The shared concurrency group permits one collector writer. Cron remains a fallback; failed or integrity-halted leases do not automatically chain. A shorter operational lease can exercise recovery without changing the study window. `CLOUD_STATUS.json` records the actual producing run, source commit and checkpoint hash, while frozen `STATUS.json` retains the engine's original wording.
+
 No paid runner, Actions artifact/cache storage, Git LFS or paid external API is used. Collection disables its workflow at the fixed tail deadline.
 
 ## Verification

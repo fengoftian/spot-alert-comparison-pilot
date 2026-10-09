@@ -32,7 +32,20 @@ def persist(data,c,seq,parent):
   if existing['sequence']!=seq or existing['parent_sha256']!=parent:raise ValueError('Cannot reuse a conflicting unpublished checkpoint')
   new_parent=journal.sha(p)
  else:p,new_parent=journal.checkpoint(c,data/'journal',seq,parent)
+ # Identify the actual producer without changing the frozen engine's status output.
+ status=json.loads((GEN/'STATUS.json').read_text()) if (GEN/'STATUS.json').exists() else {}
+ (data/'CLOUD_STATUS.json').write_text(json.dumps({
+  'host':'GITHUB_ACTIONS' if os.environ.get('GITHUB_ACTIONS')=='true' else 'LOCAL_ADAPTER_TEST',
+  'repository':os.environ.get('GITHUB_REPOSITORY'),
+  'run_id':os.environ.get('GITHUB_RUN_ID'),
+  'source_commit':os.environ.get('GITHUB_SHA'),
+  'checkpoint_sequence':seq,'checkpoint_sha256':new_parent,
+  'published_state_utc':dt.datetime.now(dt.timezone.utc).isoformat(),
+  'stage':status.get('stage'),'last_tick':status.get('last_tick'),
+  'scientific_rules_changed':False
+ },indent=2)+'\n')
  staged=archive_runtime(data)
+ staged.append('CLOUD_STATUS.json')
  git(data,'add','--','journal')
  if staged:git(data,'add','--sparse','--',*staged)
  changed=subprocess.run(['git','-C',str(data),'diff','--cached','--quiet']).returncode
@@ -55,6 +68,27 @@ def preflight(out):
  pathlib.Path(out).write_text(json.dumps({'utc':dt.datetime.now(dt.timezone.utc).isoformat(),'frozen_identity':'MATCH','public_transport':details,'strategy_evaluated':False},indent=2))
  print('Public transport and frozen identity preflight: PASS')
 
+def check_engine(c,m):
+ stage=m.getkv(c,'stage')
+ if stage in {'INTEGRITY_HALT','DISK_CAP_HALT'} or m.getkv(c,'integrity_halt',False):
+  raise RuntimeError('Frozen engine halted: '+str(stage)+'; state saved, operator review required')
+
+def hosted_repo():
+ repo=os.environ.get('GITHUB_REPOSITORY','')
+ if repo!='fengoftian/spot-alert-comparison-pilot':raise ValueError('Unexpected hosted repository identity')
+ return repo
+
+def handoff_or_stop(m,f):
+ if os.environ.get('GITHUB_ACTIONS')!='true':return
+ repo=hosted_repo()
+ if m.clock_ms()>=f['tail_end']:
+  subprocess.run(['gh','api','repos/'+repo+'/actions/workflows/collector.yml/disable','--method','PUT'],check=True)
+ else:
+  # Dispatch only after a healthy lease and successful durable final checkpoint.
+  # The single-writer group holds the successor until this run releases it.
+  subprocess.run(['gh','workflow','run','collector.yml','--repo',repo,'--ref','main','-f','mode=collect'],check=True)
+  print('Successor requested; cron remains a best-effort fallback')
+
 def collect(data,lease_seconds,checkpoint_seconds):
  data=pathlib.Path(data).resolve();m=load_study();f=m.load_freeze()
  seq,parent=journal.restore(data/'seed.sqlite.gz',data/'SEED.json',data/'journal',GEN/'state.sqlite')
@@ -62,20 +96,20 @@ def collect(data,lease_seconds,checkpoint_seconds):
  try:
   while time.monotonic()<deadline:
    began=time.monotonic();subprocess.run([sys.executable,str(GEN/'study.py'),'tick'],check=True)
+   check_engine(c,m)
    if time.monotonic()-last>=checkpoint_seconds:seq,parent=persist(data,c,seq,parent);last=time.monotonic()
    time.sleep(max(1,60-(time.monotonic()-began)))
-  if m.clock_ms()>=f['tail_end']:m.report()
+  if m.clock_ms()>=f['tail_end']:
+   # The frozen terminal tick updates completion status and reports without fetching market data.
+   subprocess.run([sys.executable,str(GEN/'study.py'),'tick'],check=True)
  finally:
   # Fail closed if the final state cannot be saved; the next job restores only a committed chain.
   seq,parent=persist(data,c,seq,parent);c.close()
- if m.clock_ms()>=f['tail_end'] and os.environ.get('GITHUB_ACTIONS')=='true':
-  repo=os.environ.get('GITHUB_REPOSITORY','')
-  if not repo or repo.count('/')!=1:raise ValueError('Repository identity unavailable for bounded shutdown')
-  subprocess.run(['gh','api','repos/'+repo+'/actions/workflows/collector.yml/disable','--method','PUT'],check=True)
+ handoff_or_stop(m,f)
  print('Hosted lease ended; last durable checkpoint',seq)
 
 if __name__=='__main__':
  p=argparse.ArgumentParser();p.add_argument('mode',choices=['preflight','collect']);p.add_argument('--output',default='cloud-preflight.json');p.add_argument('--data',default='observations');p.add_argument('--lease-seconds',type=int,default=20100);p.add_argument('--checkpoint-seconds',type=int,default=300);a=p.parse_args()
- if a.lease_seconds<1 or a.lease_seconds>20100 or a.checkpoint_seconds<60:raise ValueError('Lease/checkpoint bounds')
+ if a.lease_seconds<60 or a.lease_seconds>20100 or a.checkpoint_seconds<60:raise ValueError('Lease/checkpoint bounds')
  if a.mode=='preflight':preflight(a.output)
  else:collect(a.data,a.lease_seconds,a.checkpoint_seconds)
