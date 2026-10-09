@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>EnvironmentVariables</key>
+	<dict>
+		<key>PYTHONPYCACHEPREFIX</key>
+		<string>/private/tmp/spot-alert-pycache</string>
+	</dict>
+	<key>Label</key>
+	<string>local.listed-surge.spot-alert-comparison-v1</string>
+	<key>Nice</key>
+	<integer>10</integer>
+	<key>ProcessType</key>
+	<string>Background</string>
+	<key>ProgramArguments</key>
+	<array>
+		<string>/Library/Developer/CommandLineTools/usr/bin/python3</string>
+		<string>/Users/yangzuyu/Documents/Listed-Surge/runtime/spot-alert-comparison-v1/run_collector.py</string>
+	</array>
+	<key>RunAtLoad</key>
+	<true/>
+	<key>StandardErrorPath</key>
+	<string>/Users/yangzuyu/Documents/Listed-Surge/runtime/spot-alert-comparison-v1/collector.stderr.log</string>
+	<key>StandardOutPath</key>
+	<string>/Users/yangzuyu/Documents/Listed-Surge/runtime/spot-alert-comparison-v1/collector.stdout.log</string>
+	<key>StartInterval</key>
+	<integer>60</integer>
+	<key>WorkingDirectory</key>
+	<string>/Users/yangzuyu/Documents/Listed-Surge/runtime/spot-alert-comparison-v1</string>
+</dict>
+</plist>

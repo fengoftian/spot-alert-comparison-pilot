@@ -1,0 +1,20 @@
+{
+  "phase": "BEFORE_PROSPECTIVE_FREEZE",
+  "purpose": "Exclude non-crypto exposures from the initial 50-pair Spot liquidity candidate pool without replacing them or inspecting prospective returns",
+  "excluded_symbols": {
+    "RLUSDUSDT": "USD stablecoin",
+    "UUSDT": "United Stables USD stablecoin",
+    "XAUTUSDT": "Physical-gold-backed exposure",
+    "CRCLBUSDT": "Circle tokenized equity",
+    "SNDKBUSDT": "Sandisk tokenized equity",
+    "SPCXBUSDT": "SpaceX tokenized equity"
+  },
+  "sources": [
+    "https://www.binance.com/en/square/post/02-12-2026-binance-integrates-ripple-usd-rlusd-on-xrp-ledger-opens-deposits-290772382271537",
+    "https://academy.binance.com/en/articles/what-is-united-stables-u",
+    "https://gold.tether.to/",
+    "https://www.binance.com/en/support/announcement/detail/0e22b98c9f154d35b50f40dbad43d1c5"
+  ],
+  "threshold_or_performance_tuning": false,
+  "replacement_pairs_added": false
+}

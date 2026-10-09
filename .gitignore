@@ -1,0 +1,9 @@
+__pycache__/
+*.pyc
+gen/state.sqlite
+gen/collector.lock
+gen/raw/
+gen/STATUS.json
+gen/RESULTS.json
+gen/RESULTS.md
+cloud-preflight.json

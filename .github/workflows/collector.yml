@@ -1,0 +1,66 @@
+name: Frozen Spot alert comparison
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: Hosted preflight or continuous collection lease
+        required: true
+        default: preflight
+        type: choice
+        options: [preflight, collect]
+  schedule:
+    - cron: '17 */2 * * *'
+permissions:
+  contents: write
+  actions: write
+concurrency:
+  group: spot-alert-comparison-single-writer
+  cancel-in-progress: false
+jobs:
+  preflight:
+    if: github.event_name == 'workflow_dispatch' && inputs.mode == 'preflight'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - name: Check portable checkpoint recovery
+        run: |
+          python3 test_journal.py
+          python3 test_real_schema.py
+      - name: Check frozen engine in a disposable copy
+        run: |
+          temp_study=$(mktemp -d)
+          cp gen/study.py gen/tests.py gen/config.json "$temp_study/"
+          python3 "$temp_study/tests.py"
+      - name: Probe hosted public market data
+        run: python3 cloud_runner.py preflight
+      - name: Save proof in job summary
+        if: always()
+        run: |
+          if test -f cloud-preflight.json; then
+            cat cloud-preflight.json >> "$GITHUB_STEP_SUMMARY"
+          fi
+  collect:
+    if: vars.COLLECT_ENABLED == 'true' && (github.event_name == 'schedule' || inputs.mode == 'collect')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 350
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          path: source
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: observations
+          path: observations
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /seed.sqlite.gz
+            /SEED.json
+            /journal/
+            /STATUS.json
+            /RESULTS.json
+            /RESULTS.md
+      - name: Collect every minute and checkpoint every five minutes
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 source/cloud_runner.py collect --data observations --lease-seconds 20100 --checkpoint-seconds 300

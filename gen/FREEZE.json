@@ -1,0 +1,24 @@
+{
+  "frozen": 1791495608810,
+  "start": 1791496200000,
+  "end": 1794088200000,
+  "tail_end": 1794102600000,
+  "start_utc": "2026-10-08T21:50:00+00:00",
+  "end_utc": "2026-11-07T21:50:00+00:00",
+  "start_nzdt": "2026-10-09T10:50:00+13:00",
+  "end_nzdt": "2026-11-08T10:50:00+13:00",
+  "hashes": {
+    "study.py": "98f6784c507979daa587ffba4d53bed34f6921ba871b2c5f0b2c51957441cb9e",
+    "tests.py": "3c4fcbdf5fe438aa6786362cab323de8ae198443abbb533d17d462a5461a7e91",
+    "config.json": "383364e30c27b95484bdc97979bc827550e38d95eb124e415a4c19b85f8d2e62",
+    "DESIGN.md": "513f4952e96c3a5ed75e8852d8a2b6d849ac1cadedf15a31012c9720b02ace5b",
+    "UNIVERSE.json": "1d7b3aab5bce6767ee6e10fa0d304fa5516555df62340fa7587d37f5f406bda0",
+    "COHORT.json": "1f9b4c028780fc2dc639bdf4d3bcc5841f307fe80c9ce1ab41085578b4966bd5",
+    "CLASSIFICATION.json": "fa2bb2c5b0ffbf44ac77b2c3570d64ce00b4edd555d8b679ed47934c30eb66c0",
+    "TEST_RESULTS.json": "2e89a16b2f8374642e65cea030140b8715d6545209133a0598213d4fa95ad255",
+    "run_collector.py": "56b2acb65232231bc99d12dce445eadaab26e49b8f881592e9adbb90c1041cb2",
+    "install_collector.py": "1c01acc0dce19dbc9024f3c36ae44fbbfc7fc24e9cf94e20a2e243f910f2a198",
+    "collector.plist": "d876efc5382d444eb12af15abe7967fca271d3e6073e9529b636aa5c66d54bd1"
+  },
+  "authority": "PUBLIC_DATA_AND_SIMULATED_SCREENING_ONLY"
+}
