@@ -16,4 +16,11 @@ class RealSchemaTests(unittest.TestCase):
    seq,parent=journal.restore(p/'seed.sqlite.gz',p/'SEED.json',p/'journal',p/'restored.sqlite');r=sqlite3.connect(p/'restored.sqlite')
    self.assertEqual(seq,2);self.assertEqual(r.execute("SELECT cash,fees,entries,peak FROM accounts WHERE k='A0:2000:15'").fetchone(),(1990,1,1,2020));self.assertEqual(r.execute('SELECT COUNT(*) FROM positions').fetchone()[0],0);self.assertEqual(r.execute('SELECT COUNT(*) FROM marks').fetchone()[0],1)
    r.close();c.close()
+ def test_original_upsert_can_update_same_dirty_key_repeatedly(self):
+  with tempfile.TemporaryDirectory() as tmp:
+   p=pathlib.Path(tmp);c=m.connect(p/'state.sqlite');journal.install(c)
+   for i in range(3):m.setkv(c,'processed:BTCUSDT',i);c.commit()
+   self.assertEqual(c.execute("SELECT COUNT(*) FROM cloud_dirty WHERE tab='kv'").fetchone()[0],1)
+   self.assertEqual(m.getkv(c,'processed:BTCUSDT'),2)
+   c.close()
 if __name__=='__main__':unittest.main(verbosity=2)

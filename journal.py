@@ -14,7 +14,7 @@ def install(c):
   _,keys=schema(c,t)
   for op,ref in [('INSERT','NEW'),('UPDATE','NEW'),('DELETE','OLD')]:
    vals=','.join(ref+'.'+k for k in keys)
-   c.execute(f"CREATE TRIGGER IF NOT EXISTS cloud_{t}_{op} AFTER {op} ON {t} BEGIN INSERT OR IGNORE INTO cloud_dirty VALUES('{t}',json_array({vals})); END")
+   c.execute(f"CREATE TRIGGER IF NOT EXISTS cloud_{t}_{op} AFTER {op} ON {t} BEGIN INSERT INTO cloud_dirty SELECT '{t}',json_array({vals}) WHERE NOT EXISTS (SELECT 1 FROM cloud_dirty WHERE tab='{t}' AND key_json=json_array({vals})); END")
  c.commit()
 
 def checkpoint(c,root,seq,parent):

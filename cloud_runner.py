@@ -1,5 +1,5 @@
 """GitHub-hosted minute collector, bounded lease and durable state journal."""
-import argparse,datetime as dt,gzip,hashlib,importlib.util,json,os,pathlib,shutil,sqlite3,subprocess,tempfile,time
+import argparse,datetime as dt,gzip,hashlib,importlib.util,json,os,pathlib,shutil,sqlite3,subprocess,sys,tempfile,time
 import journal
 HERE=pathlib.Path(__file__).resolve().parent;GEN=HERE/'gen'
 
@@ -26,10 +26,17 @@ def archive_runtime(data):
  return staged
 
 def persist(data,c,seq,parent):
- seq+=1;p,new_parent=journal.checkpoint(c,data/'journal',seq,parent);staged=archive_runtime(data)
+ seq+=1;p=data/'journal'/f'{seq:08d}.json.gz'
+ if p.exists():
+  with gzip.open(p,'rt') as h:existing=json.load(h)
+  if existing['sequence']!=seq or existing['parent_sha256']!=parent:raise ValueError('Cannot reuse a conflicting unpublished checkpoint')
+  new_parent=journal.sha(p)
+ else:p,new_parent=journal.checkpoint(c,data/'journal',seq,parent)
+ staged=archive_runtime(data)
  git(data,'add','--','journal')
  if staged:git(data,'add','--sparse','--',*staged)
- git(data,'-c','user.name=github-actions[bot]','-c','user.email=41898282+github-actions[bot]@users.noreply.github.com','commit','-m',f'Append study checkpoint {seq}')
+ changed=subprocess.run(['git','-C',str(data),'diff','--cached','--quiet']).returncode
+ if changed:git(data,'-c','user.name=github-actions[bot]','-c','user.email=41898282+github-actions[bot]@users.noreply.github.com','commit','-m',f'Append study checkpoint {seq}')
  git(data,'push','origin','HEAD:observations')
  # Raw observations remain durably archived; remove ephemeral duplicates only AFTER successful push.
  if (GEN/'raw').exists():
@@ -54,7 +61,7 @@ def collect(data,lease_seconds,checkpoint_seconds):
  c=sqlite3.connect(GEN/'state.sqlite');deadline=min(time.monotonic()+lease_seconds,time.monotonic()+max(0,(f['tail_end']-m.clock_ms())/1000));last=time.monotonic()
  try:
   while time.monotonic()<deadline:
-   began=time.monotonic();m.tick()
+   began=time.monotonic();subprocess.run([sys.executable,str(GEN/'study.py'),'tick'],check=True)
    if time.monotonic()-last>=checkpoint_seconds:seq,parent=persist(data,c,seq,parent);last=time.monotonic()
    time.sleep(max(1,60-(time.monotonic()-began)))
   if m.clock_ms()>=f['tail_end']:m.report()
