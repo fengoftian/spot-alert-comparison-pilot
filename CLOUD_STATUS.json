@@ -1,11 +1,11 @@
 {
   "host": "GITHUB_ACTIONS",
   "repository": "fengoftian/spot-alert-comparison-pilot",
-  "run_id": "38038298505",
+  "run_id": "38052135146",
   "source_commit": "693b9006916f72aa4d2396751d12c192d705fc61",
-  "checkpoint_sequence": 326,
-  "checkpoint_sha256": "61e1b3e766a1f37e30cf2e6d46bb629bc5a9c3a48ee79e488d162b59c0ae725c",
-  "published_state_utc": "2026-10-10T10:49:05.961457+00:00",
+  "checkpoint_sequence": 327,
+  "checkpoint_sha256": "c971dad9b6a61c780aef65e4dfab60113da590089588c14165800bfcd7a6b6e0",
+  "published_state_utc": "2026-10-10T12:29:43.681800+00:00",
   "stage": "INTEGRITY_HALT",
   "last_tick": 1791629286034,
   "scientific_rules_changed": false
