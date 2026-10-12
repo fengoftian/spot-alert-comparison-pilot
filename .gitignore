@@ -7,3 +7,5 @@ gen/STATUS.json
 gen/RESULTS.json
 gen/RESULTS.md
 cloud-preflight.json
+
+/health-output.json

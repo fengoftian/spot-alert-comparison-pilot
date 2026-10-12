@@ -1,0 +1,25 @@
+name: Spot collection health observer
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '7,22,37,52 * * * *'
+permissions:
+  contents: write
+  actions: write
+concurrency:
+  group: spot-collection-health-observer
+  cancel-in-progress: false
+jobs:
+  health:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - name: Test observer and offline ingestion prototype
+        run: |
+          python3 -m unittest discover -s ops/health-v1 -v
+          python3 -m unittest discover -s ops/ingestion-v1 -v
+      - name: Verify both committed collection snapshots
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 ops/health-v1/check.py
