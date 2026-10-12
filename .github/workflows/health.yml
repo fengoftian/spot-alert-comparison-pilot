@@ -22,4 +22,5 @@ jobs:
       - name: Verify both committed collection snapshots
         env:
           GH_TOKEN: ${{ github.token }}
+          A_COLLECT_ENABLED: ${{ vars.COLLECT_ENABLED }}
         run: python3 ops/health-v1/check.py

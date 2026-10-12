@@ -1,5 +1,6 @@
-import copy,unittest
-from check import assess,REPOS
+import copy,os,unittest
+from unittest.mock import patch
+from check import assess,REPOS,a_enabled
 class HealthTests(unittest.TestCase):
  def setUp(self):
   self.now=2000000;self.st={'stage':'COLLECTING','last_tick':1900000,'frozen_identity_ok':True,'open_positions':0,'coverage':[{'symbol':str(i),'last':1860000} for i in range(44)]};self.cl={'repository':REPOS['B'],'host':'GITHUB_ACTIONS','stage':'COLLECTING','last_tick':1900000,'source_commit':'source'};self.run={'head_sha':'source','status':'in_progress','conclusion':None};self.f={'tail_end':3000000}
@@ -25,4 +26,13 @@ class HealthTests(unittest.TestCase):
   self.now=3000000;self.assertIn('TERMINAL_STATUS_NOT_PUBLISHED',self.assess()['problems'])
  def test_tail_completion_is_expected(self):
   self.now=3000000;self.st['stage']=self.cl['stage']='COMPLETE_OR_UNRESOLVED_AT_TAIL';self.assertEqual(self.assess()['state'],'COMPLETE')
+ def test_hosted_false_context_avoids_forbidden_variable_api(self):
+  with patch.dict(os.environ,{'A_COLLECT_ENABLED':'false'}),patch('check.api') as api:
+   self.assertFalse(a_enabled());api.assert_not_called()
+ def test_hosted_true_context_avoids_forbidden_variable_api(self):
+  with patch.dict(os.environ,{'A_COLLECT_ENABLED':'true'}),patch('check.api') as api:
+   self.assertTrue(a_enabled());api.assert_not_called()
+ def test_missing_workflow_variable_is_explicitly_unavailable(self):
+  with patch.dict(os.environ,{'A_COLLECT_ENABLED':''}):
+   with self.assertRaises(ValueError):a_enabled()
 if __name__=='__main__':unittest.main(verbosity=2)

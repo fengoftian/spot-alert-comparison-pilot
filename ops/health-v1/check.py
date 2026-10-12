@@ -19,6 +19,14 @@ def file(repo,path,ref):
  if hashlib.sha1(b'blob '+str(len(b)).encode()+b'\0'+b).hexdigest()!=r['sha']:raise ValueError('Git blob mismatch')
  return b
 
+def a_enabled():
+ # Built-in workflow tokens cannot call the repository Variables API. Use the
+ # authoritative workflow context in hosted runs; the owner CLI can read it locally.
+ value=os.environ.get('A_COLLECT_ENABLED')
+ if value is None:value=api(f'repos/{OWN}/actions/variables/COLLECT_ENABLED')['value']
+ if value not in {'true','false'}:raise ValueError('A collection enable status unavailable')
+ return value=='true'
+
 def assess(label,status,cloud,freeze,producer,now,enabled=True):
  problems=[]
  if cloud.get('repository')!=REPOS[label] or cloud.get('host')!='GITHUB_ACTIONS':problems.append('PRODUCER_IDENTITY')
@@ -48,7 +56,7 @@ def inspect(label,now):
  if hashlib.sha256(frozen_bytes).hexdigest()!=FREEZES[label] or seed['seed_sha256']!=SEEDS[label]:raise ValueError('Original freeze or seed changed')
  producer=api(f'repos/{repo}/actions/runs/{cl["run_id"]}')
  enabled=True
- if label=='A':enabled=api(f'repos/{repo}/actions/variables/COLLECT_ENABLED')['value']=='true'
+ if label=='A':enabled=a_enabled()
  result=assess(label,st,cl,fr,producer,now,enabled)
  result.update(commit=head,producer_id=cl['run_id'],source_commit=cl['source_commit'],tail_end=fr['tail_end'],seed_identity_verified=True,freeze_identity_verified=True)
  if result['state'] not in {'HEALTHY'}:return result
