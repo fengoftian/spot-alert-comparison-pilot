@@ -1,0 +1,29 @@
+{
+  "fingerprint": "55d7939db085b4670e1b9dd2ca299987dd2792b705bf6206d8b504d54f5d39d6",
+  "checked_utc": "2026-10-12T00:23:02.658916+00:00",
+  "studies": {
+    "A": {
+      "state": "VERIFICATION_UNAVAILABLE",
+      "problems": [
+        "RuntimeError: GitHub API request failed: repos/fengoftian/spot-alert-comparison-pilot/actions/variables/COLLECT_ENABLED gh: Resource not accessible by integration (HTTP 403)\n"
+      ]
+    },
+    "B": {
+      "state": "HEALTHY",
+      "problems": [],
+      "collection_active": true,
+      "tick_age_seconds": 278.64,
+      "oldest_close_age_seconds": 296.23,
+      "commit": "b39a3ddc45dc84d37eee58e32ad1928663ea2d7d",
+      "producer_id": "38178681861",
+      "source_commit": "5c3738611f66370981f7694eb22cf950862f143c",
+      "tail_end": 1794141900000,
+      "seed_identity_verified": true,
+      "freeze_identity_verified": true,
+      "successful_responses": 44,
+      "receipt_symbols": 44,
+      "prospective_receipts": 167772,
+      "warmup_receipts": 1945027
+    }
+  }
+}
