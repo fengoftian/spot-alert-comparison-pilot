@@ -1,10 +1,8 @@
 {
-  "fingerprint": "9b7de3b24eac3dee656f2263d4a04e98af2e9a47eedb01b932cd1046faff8cf0",
-  "incident_categories": {
-    "B": "PRODUCER_FAILURE"
-  },
+  "fingerprint": null,
+  "incident_categories": {},
   "consecutive_unavailable": {},
-  "checked_utc": "2026-10-12T15:57:33.512390+00:00",
+  "checked_utc": "2026-10-12T22:50:44.587188+00:00",
   "studies": {
     "A": {
       "state": "KNOWN_CONTAINED_HALT_INCOMPLETE",
@@ -18,21 +16,21 @@
       "freeze_identity_verified": true
     },
     "B": {
-      "state": "FAILURE",
-      "problems": [
-        "CANDLES_STALE",
-        "PRODUCER_FAILED",
-        "TICK_STALE"
-      ],
+      "state": "HEALTHY",
+      "problems": [],
       "collection_active": true,
-      "tick_age_seconds": 10306.47,
-      "oldest_close_age_seconds": 10347.3,
-      "commit": "f4c7d4cb087ef9b46e91c44b9d3d6dba11685b81",
-      "producer_id": "38228324619",
+      "tick_age_seconds": 324.74,
+      "oldest_close_age_seconds": 336.83,
+      "commit": "416138e41d79c927082f63d2afbd3e1b68a84cc1",
+      "producer_id": "38311991989",
       "source_commit": "5c3738611f66370981f7694eb22cf950862f143c",
       "tail_end": 1794141900000,
       "seed_identity_verified": true,
-      "freeze_identity_verified": true
+      "freeze_identity_verified": true,
+      "successful_responses": 44,
+      "receipt_symbols": 44,
+      "prospective_receipts": 227040,
+      "warmup_receipts": 1945027
     }
   }
 }
