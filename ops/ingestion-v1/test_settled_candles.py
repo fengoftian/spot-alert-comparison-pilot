@@ -18,6 +18,11 @@ class AdmissionTests(unittest.TestCase):
   self.assertEqual(g.admitted[('TEST',0)],a)
  def test_duplicate_admitted_observation_is_idempotent(self):
   g=AdmissionGate();g.observe('TEST',bar(),61000);a=g.observe('TEST',bar(),120000);self.assertEqual(g.observe('TEST',bar(),180000),a)
+ def test_caller_cannot_rewrite_admitted_or_observed_history(self):
+  g=AdmissionGate();g.observe('TEST',bar(),61000);a=g.observe('TEST',bar(),120000)
+  with self.assertRaises(TypeError):a['raw']='rewritten'
+  with self.assertRaises(TypeError):g.observations[0]['raw']='rewritten'
+  with self.assertRaises(TypeError):g.admitted[('TEST',0)]={}
  def test_invalid_schema_and_values_are_rejected(self):
   for row in [bar()[:5],bar()+[1]]:
    with self.assertRaises(ValueError):AdmissionGate().observe('TEST',row,120000)

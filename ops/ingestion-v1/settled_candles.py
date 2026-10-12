@@ -1,6 +1,7 @@
 """Offline ingestion prototype. Does not collect, trade, or amend a frozen study."""
 import hashlib,json,math
 from decimal import Decimal
+from types import MappingProxyType
 
 class DataRevisionError(ValueError):pass
 
@@ -21,13 +22,19 @@ class AdmissionGate:
  def __init__(self,minimum_age_ms=60000,minimum_separation_ms=15000):
   if minimum_age_ms<60000 or minimum_separation_ms<15000:raise ValueError('Prototype admission bounds')
   self.age=minimum_age_ms;self.separation=minimum_separation_ms
-  self.pending={};self.admitted={};self.observations=[];self.last_seen={}
+  self.pending={};self._admitted={};self._observations=[];self.last_seen={}
+
+ @property
+ def admitted(self):return MappingProxyType(self._admitted)
+
+ @property
+ def observations(self):return tuple(self._observations)
 
  def observe(self,symbol,row,received):
   if type(received) is not int:raise ValueError('Receipt time must be integer milliseconds')
   body=json.dumps(row,separators=(',',':'))
   # Retain original captured content and each subsequent observation.
-  self.observations.append({'symbol':symbol,'received':received,'sha256':hashlib.sha256(body.encode()).hexdigest(),'raw':body})
+  self._observations.append(MappingProxyType({'symbol':symbol,'received':received,'sha256':hashlib.sha256(body.encode()).hexdigest(),'raw':body}))
   validate(row)
   key=(symbol,row[0]);closed=row[6]+1
   if key in self.last_seen and received<self.last_seen[key]:raise ValueError('Out-of-order receipt')
@@ -41,7 +48,7 @@ class AdmissionGate:
   old['last_received']=received
   if received-closed<self.age or received-old['stable_since']<self.separation:return None
   result={'symbol':symbol,'open_time':row[0],'closed_at':closed,'available_at':received,'raw':body,'sha256':hashlib.sha256(body.encode()).hexdigest()}
-  self.admitted[key]=result;return result
+  self._admitted[key]=MappingProxyType(result);return self._admitted[key]
 
 def entry_time_eligible(admission,book_received,request_duration,study_end):
  """Truthful current-book timing; never backdate an admission or fill."""
