@@ -49,6 +49,23 @@ def assess(label,status,cloud,freeze,producer,now,enabled=True):
  if oldest>MAX_AGE_SECONDS:problems.append('CANDLES_STALE')
  return {'state':'HEALTHY' if not problems else 'FAILURE','problems':sorted(set(problems)),'collection_active':True,'tick_age_seconds':round(age,2),'oldest_close_age_seconds':round(oldest,2)}
 
+def incident_categories(results,previous):
+ categories={};unavailable={}
+ for label,result in results.items():
+  problems=set(result['problems'])
+  if result['state']=='VERIFICATION_UNAVAILABLE':
+   unavailable[label]=previous.get('consecutive_unavailable',{}).get(label,0)+1
+   if unavailable[label]>=2:categories[label]='VERIFICATION_UNAVAILABLE'
+  elif problems:
+   if 'COLLECTOR_HALTED' in problems:category='HALT'
+   elif any('IDENTITY' in p or 'SOURCE' in p or 'MISMATCH' in p for p in problems):category='IDENTITY'
+   elif 'PRODUCER_FAILED' in problems:category='PRODUCER_FAILURE'
+   elif 'TICK_FROM_FUTURE' in problems:category='CLOCK'
+   elif 'TICK_STALE' in problems or 'CANDLES_STALE' in problems:category='STALE'
+   else:category='DATA_VALIDATION'
+   categories[label]=category
+ return categories,unavailable
+
 def inspect(label,now):
  repo=REPOS[label];head=api(f'repos/{repo}/branches/observations')['commit']['sha']
  st=json.loads(file(repo,'STATUS.json',head));cl=json.loads(file(repo,'CLOUD_STATUS.json',head));seed=json.loads(file(repo,'SEED.json',head))
@@ -96,26 +113,27 @@ def main():
  now=int(dt.datetime.now(dt.timezone.utc).timestamp()*1000);results={}
  for label in REPOS:
   try:results[label]=inspect(label,now)
-  except Exception as ex:results[label]={'state':'VERIFICATION_UNAVAILABLE','problems':[type(ex).__name__+': '+str(ex)[:250]]}
+  except (RuntimeError,subprocess.TimeoutExpired) as ex:results[label]={'state':'VERIFICATION_UNAVAILABLE','problems':[type(ex).__name__+': '+str(ex)[:250]]}
+  except Exception as ex:results[label]={'state':'FAILURE','problems':['DATA_VALIDATION: '+type(ex).__name__+': '+str(ex)[:250]]}
  out={'checked_utc':dt.datetime.now(dt.timezone.utc).isoformat(),'studies':results,'scope':'Collection integrity/freshness only; no account economics'}
  print(json.dumps(out,indent=2));pathlib.Path('health-output.json').write_text(json.dumps(out,indent=2)+'\n')
  if os.environ.get('GITHUB_ACTIONS')=='true':
   with open(os.environ['GITHUB_STEP_SUMMARY'],'a') as h:h.write('### Collection observer\n\n```json\n'+json.dumps(out,indent=2)+'\n```\n')
  # Unavailable verification is explicit, never reported as a collection failure or health.
- failed={k:(['VERIFICATION_UNAVAILABLE'] if v['state']=='VERIFICATION_UNAVAILABLE' else v['problems']) for k,v in results.items() if v['problems']}
- fingerprint=hashlib.sha256(json.dumps(failed,sort_keys=True).encode()).hexdigest() if failed else None
  previous={};content_sha=None
  try:
   prev=api(f'repos/{OWN}/contents/health-state.json?ref=health-state');content_sha=prev['sha'];previous=json.loads(base64.b64decode(prev['content']))
  except RuntimeError:pass
- state={'fingerprint':fingerprint,'checked_utc':out['checked_utc'],'studies':results}
+ categories,unavailable=incident_categories(results,previous)
+ fingerprint=hashlib.sha256(json.dumps(categories,sort_keys=True).encode()).hexdigest() if categories else None
+ state={'fingerprint':fingerprint,'incident_categories':categories,'consecutive_unavailable':unavailable,'checked_utc':out['checked_utc'],'studies':results}
  if os.environ.get('GITHUB_ACTIONS')=='true':
   body={'message':'Record collection observer state','content':base64.b64encode((json.dumps(state,indent=2)+'\n').encode()).decode(),'branch':'health-state'}
   if content_sha:body['sha']=content_sha
   api(f'repos/{OWN}/contents/health-state.json',method='PUT',data=body)
   if all('tail_end' in v for v in results.values()) and now>=max(v['tail_end'] for v in results.values()):
    api(f'repos/{OWN}/actions/workflows/health.yml/disable',method='PUT')
- if failed and fingerprint!=previous.get('fingerprint'):return 1
+ if categories and fingerprint!=previous.get('fingerprint'):return 1
  return 0
 
 if __name__=='__main__':raise SystemExit(main())

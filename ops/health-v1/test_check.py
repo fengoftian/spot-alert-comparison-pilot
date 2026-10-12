@@ -1,6 +1,6 @@
 import copy,os,unittest
 from unittest.mock import patch
-from check import assess,REPOS,a_enabled
+from check import assess,REPOS,a_enabled,incident_categories
 class HealthTests(unittest.TestCase):
  def setUp(self):
   self.now=2000000;self.st={'stage':'COLLECTING','last_tick':1900000,'frozen_identity_ok':True,'open_positions':0,'coverage':[{'symbol':str(i),'last':1860000} for i in range(44)]};self.cl={'repository':REPOS['B'],'host':'GITHUB_ACTIONS','stage':'COLLECTING','last_tick':1900000,'source_commit':'source'};self.run={'head_sha':'source','status':'in_progress','conclusion':None};self.f={'tail_end':3000000}
@@ -35,4 +35,17 @@ class HealthTests(unittest.TestCase):
  def test_missing_workflow_variable_is_explicitly_unavailable(self):
   with patch.dict(os.environ,{'A_COLLECT_ENABLED':''}):
    with self.assertRaises(ValueError):a_enabled()
+ def test_same_halt_does_not_change_category_when_staleness_grows(self):
+  a,_=incident_categories({'B':{'state':'FAILURE','problems':['COLLECTOR_HALTED','PRODUCER_FAILED']}},{})
+  b,_=incident_categories({'B':{'state':'FAILURE','problems':['COLLECTOR_HALTED','PRODUCER_FAILED','TICK_STALE','CANDLES_STALE']}},{})
+  self.assertEqual(a,b)
+ def test_one_transient_network_failure_does_not_alert(self):
+  c,u=incident_categories({'B':{'state':'VERIFICATION_UNAVAILABLE','problems':['timeout']}},{})
+  self.assertEqual(c,{});self.assertEqual(u,{'B':1})
+ def test_repeated_unavailable_verification_is_actionable(self):
+  c,_=incident_categories({'B':{'state':'VERIFICATION_UNAVAILABLE','problems':['timeout']}},{'consecutive_unavailable':{'B':1}})
+  self.assertEqual(c,{'B':'VERIFICATION_UNAVAILABLE'})
+ def test_recovery_clears_incident_category(self):
+  c,u=incident_categories({'B':{'state':'HEALTHY','problems':[]}},{'consecutive_unavailable':{'B':2}})
+  self.assertEqual(c,{});self.assertEqual(u,{})
 if __name__=='__main__':unittest.main(verbosity=2)
