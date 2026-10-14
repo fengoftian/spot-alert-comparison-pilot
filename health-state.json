@@ -2,7 +2,7 @@
   "fingerprint": null,
   "incident_categories": {},
   "consecutive_unavailable": {},
-  "checked_utc": "2026-10-14T01:03:00.981082+00:00",
+  "checked_utc": "2026-10-14T06:00:13.108164+00:00",
   "studies": {
     "A": {
       "state": "KNOWN_CONTAINED_HALT_INCOMPLETE",
@@ -19,17 +19,17 @@
       "state": "HEALTHY",
       "problems": [],
       "collection_active": true,
-      "tick_age_seconds": 337.45,
-      "oldest_close_age_seconds": 356.22,
-      "commit": "3edeab126846a6f94b96a785d86b660adf2fd6d6",
-      "producer_id": "38459770449",
+      "tick_age_seconds": 153.41,
+      "oldest_close_age_seconds": 186.91,
+      "commit": "10f440a4c9a69434aa723af07afd100a4c62b1ab",
+      "producer_id": "38496882919",
       "source_commit": "5c3738611f66370981f7694eb22cf950862f143c",
       "tail_end": 1794141900000,
       "seed_identity_verified": true,
       "freeze_identity_verified": true,
       "successful_responses": 44,
       "receipt_symbols": 44,
-      "prospective_receipts": 296208,
+      "prospective_receipts": 309408,
       "warmup_receipts": 1945027
     }
   }
