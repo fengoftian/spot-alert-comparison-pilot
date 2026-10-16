@@ -1,8 +1,10 @@
 {
-  "fingerprint": null,
-  "incident_categories": {},
+  "fingerprint": "4618f99cf9fdfc6d23e5aacb858734d9686869e28a6def8dffa73c08b6fc5996",
+  "incident_categories": {
+    "B": "HALT"
+  },
   "consecutive_unavailable": {},
-  "checked_utc": "2026-10-16T05:08:23.347000+00:00",
+  "checked_utc": "2026-10-16T09:53:31.898499+00:00",
   "studies": {
     "A": {
       "state": "KNOWN_CONTAINED_HALT_INCOMPLETE",
@@ -16,21 +18,20 @@
       "freeze_identity_verified": true
     },
     "B": {
-      "state": "HEALTHY",
-      "problems": [],
+      "state": "FAILURE",
+      "problems": [
+        "COLLECTOR_HALTED",
+        "PRODUCER_FAILED"
+      ],
       "collection_active": true,
-      "tick_age_seconds": 260.38,
-      "oldest_close_age_seconds": 318.86,
-      "commit": "623a961629ad30bbdfa6989f56567b2495fc157b",
-      "producer_id": "38848620735",
+      "tick_age_seconds": 740.46,
+      "oldest_close_age_seconds": 748.37,
+      "commit": "87872232c04c2efa3524b2448da667d898b39540",
+      "producer_id": "38882004314",
       "source_commit": "5c3738611f66370981f7694eb22cf950862f143c",
       "tail_end": 1794141900000,
       "seed_identity_verified": true,
-      "freeze_identity_verified": true,
-      "successful_responses": 44,
-      "receipt_symbols": 44,
-      "prospective_receipts": 433752,
-      "warmup_receipts": 1945027
+      "freeze_identity_verified": true
     }
   }
 }
