@@ -4,7 +4,7 @@
     "B": "HALT"
   },
   "consecutive_unavailable": {},
-  "checked_utc": "2026-10-16T09:53:31.898499+00:00",
+  "checked_utc": "2026-10-16T14:42:34.871268+00:00",
   "studies": {
     "A": {
       "state": "KNOWN_CONTAINED_HALT_INCOMPLETE",
@@ -20,14 +20,16 @@
     "B": {
       "state": "FAILURE",
       "problems": [
+        "CANDLES_STALE",
         "COLLECTOR_HALTED",
-        "PRODUCER_FAILED"
+        "PRODUCER_FAILED",
+        "TICK_STALE"
       ],
       "collection_active": true,
-      "tick_age_seconds": 740.46,
-      "oldest_close_age_seconds": 748.37,
-      "commit": "87872232c04c2efa3524b2448da667d898b39540",
-      "producer_id": "38882004314",
+      "tick_age_seconds": 18082.22,
+      "oldest_close_age_seconds": 18090.13,
+      "commit": "6544fc366178464c06bbdd1dadfbe8563e5744ab",
+      "producer_id": "38908364947",
       "source_commit": "5c3738611f66370981f7694eb22cf950862f143c",
       "tail_end": 1794141900000,
       "seed_identity_verified": true,
