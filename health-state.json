@@ -4,7 +4,7 @@
     "B": "HALT"
   },
   "consecutive_unavailable": {},
-  "checked_utc": "2026-11-04T21:54:48.840862+00:00",
+  "checked_utc": "2026-11-05T02:09:05.270592+00:00",
   "studies": {
     "A": {
       "state": "KNOWN_CONTAINED_HALT_INCOMPLETE",
@@ -26,8 +26,8 @@
         "TICK_STALE"
       ],
       "collection_active": true,
-      "tick_age_seconds": 1685616.96,
-      "oldest_close_age_seconds": 1685624.87,
+      "tick_age_seconds": 1700873.39,
+      "oldest_close_age_seconds": 1700881.3,
       "commit": "12ab1e5525fba3dd94a83ad2d28da846bfbaf8c2",
       "producer_id": "38987845525",
       "source_commit": "5c3738611f66370981f7694eb22cf950862f143c",
