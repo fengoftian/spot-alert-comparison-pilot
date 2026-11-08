@@ -1,10 +1,10 @@
 {
-  "fingerprint": "4618f99cf9fdfc6d23e5aacb858734d9686869e28a6def8dffa73c08b6fc5996",
+  "fingerprint": "dc1e59cb87c28246a6987b398f5439d495dba3b1871bbb84f40c2772ab54619c",
   "incident_categories": {
-    "B": "HALT"
+    "B": "DATA_VALIDATION"
   },
   "consecutive_unavailable": {},
-  "checked_utc": "2026-11-08T08:49:57.960294+00:00",
+  "checked_utc": "2026-11-08T15:37:02.054130+00:00",
   "studies": {
     "A": {
       "state": "KNOWN_CONTAINED_HALT_INCOMPLETE",
@@ -20,14 +20,9 @@
     "B": {
       "state": "FAILURE",
       "problems": [
-        "CANDLES_STALE",
-        "COLLECTOR_HALTED",
-        "PRODUCER_FAILED",
-        "TICK_STALE"
+        "TERMINAL_STATUS_NOT_PUBLISHED"
       ],
-      "collection_active": true,
-      "tick_age_seconds": 1984126.13,
-      "oldest_close_age_seconds": 1984134.04,
+      "collection_active": false,
       "commit": "12ab1e5525fba3dd94a83ad2d28da846bfbaf8c2",
       "producer_id": "38987845525",
       "source_commit": "5c3738611f66370981f7694eb22cf950862f143c",
